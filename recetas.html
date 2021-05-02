@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+
+    <title>Recetas</title>
+  </head>
+  <body style="background-color: #F7F2E0" onload="docs()">
+    <div class="col text-center" style="width: 100%;background-color:#B404AE">
+        <br>
+        <h1 style="color:#FFFFFF">Generar recetas</h1>
+        <br>
+    </div>
+    <div>
+        <div class="col text-center" style="width: 80%; padding-left: 350px; float: center">
+          <br>
+            <form name="f">
+            <div class="mb-3">
+              <label for="Nombre" class="form-label">Fecha de generacion(DD/MM/AAAA)</label>
+              <input type="text" class="form-control" id="Nombre">
+            </div>
+            <div class="mb-3">
+              <label for="Apellido" class="form-label">Paciente</label>
+              <input type="text" class="form-control" id="Apellido">
+            </div>
+              <br>
+              <button  type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">PADECIMIENTO</button>
+              <br>
+              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Seleccionar Doctor</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id='nueva' style="width: 90%">
+                            <br>
+                            <br>
+                            <table id='a' class="table table-bordered border-primary">
+                                <thead>
+                                    <tr class="table-info">
+                                        <th> Nombre </th>
+                                        <th> Opciones </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="datos2"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-danger" data-bs-dismiss="modal">CERRAR</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="mb-3">
+                <label for="Nombre" class="form-label">Descripcion</label>
+                <input type="text" class="form-control" id="Descripcion">
+              </div>
+              <br>
+              <button onclick="enviardatos()" type="button" class="btn btn-success btn-lg">GENERAR RECETA</button>
+          </form>
+        </div>
+        </div>
+        <br>
+       <div class="col text-center">
+        <button onclick="regresoprincipal()" type="button" class="btn btn-danger btn-lg">REGRESAR</button>
+        <br>
+      </div>
+      <br>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+        <script src="js/jspdf.min.js"></script>
+        <script src="js/jspdf.plugin.autotable.min.js"></script>
+
+
+    <script>
+       
+        function agregarc(boton){
+            var doctor= boton.value
+            sessionStorage.setItem("buscari", doctor)
+        }
+
+
+        function enviardatos(){
+            var fecha = document.querySelector('#Nombre').value
+            var paciente = document.querySelector('#Apellido').value
+            var Enfermedad= sessionStorage.buscari
+            var descripcion = document.querySelector('#Descripcion').value
+
+            var columnas = ['Fecha','Paciente','Enfermedad','Descripcion']
+            var datos = [[fecha,paciente,Enfermedad,descripcion]]
+            var pdf = new jsPDF();
+            pdf.text(90,10,"Receta");   
+            pdf.autoTable(columnas, datos);
+            pdf.save('Receta.pdf');
+        }
+
+
+
+        function regresoprincipal(){
+            location.href = "Doct.html"
+        }
+        function inicio(){
+            location.href = "login.html"
+        }
+
+        function docs(){
+            var tabla2 = document.querySelector('#datos2')
+            var cadena2 = ''
+            fetch('https://backend-pr2.herokuapp.com/Enfermedades', {
+            method: 'GET',
+            headers:{
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',}})
+            .then(resp => resp.json())
+            .catch(erro => {
+                console.error('Error:', erro)
+                alert("Error")
+            })
+            .then(response =>{
+                console.log(response);
+                response.forEach(element => {
+                    console.log(element)
+                    cadena2 += `<tr>
+                        <td> ${element.Nombre} </td>
+                        <td> <button value=${element.Nombre} onclick="agregarc(this)" type="button" class="btn btn-success" data-bs-dismiss="modal">Seleccionar</button> </td>
+                        </tr>`         
+                });
+                tabla2.innerHTML = cadena2
+            })    
+        }
+
+    </script>        
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>
